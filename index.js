@@ -124,8 +124,16 @@ module.exports = function(options) {
 		name = namespace+name;
 
 		queueURL(name, function(url) {
-			var body = options.raw ? message : JSON.stringify(message);
-			retry(request, queryURL('SendMessage', url, {MessageBody: body}), callback);
+			var body = options.raw ? message.body : JSON.stringify(message.body);
+			var messageAttributes = message.attributes;
+			var deduplicationId = message.deduplicationId;
+			var groupId = message.groupId;
+			retry(request, queryURL('SendMessage', url, Object.assign(
+			  { MessageBody: body },
+        messageAttributes ? { MessageAttributes: messageAttributes } : null,
+        deduplicationId ? { MessageDeduplicationId: deduplicationId } : null,
+        groupId ? { MessageDeduplicationId: groupId } : null
+      ), callback));
 		});
 	};
 
